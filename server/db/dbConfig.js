@@ -10,13 +10,14 @@ const dbConnection = mysql.createPool({
   connectionLimit: 10,
 });
 
-dbConnection.execute("SELECT 'test' ", function (error, results) {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log(results);
-  }
-});
+module.exports = dbConnection.promise();
+// dbConnection.execute("SELECT 'test' ", function (error, results) {
+//   if (error) {
+//     console.log(error);
+//   } else {
+//     console.log(results);
+//   }
+// });
 
 // CREATE TABLE users(
 // 	userid INT(20) NOT NULL AUTO_INCREMENT,

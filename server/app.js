@@ -3,10 +3,14 @@ const express = require("express");
 const port = 3000;
 const app = express();
 
-// user routes middleware file
+//db connection
+const dbconnection = require("./db/dbConfig");
 
+// user routes middleware file
 const userRoutes = require("./routes/userRoute");
 
+//json middleware to extract data
+app.use(express.json());
 // user routes middleware
 app.use("/api/users", userRoutes);
 
@@ -18,10 +22,13 @@ app.use("/api/users", userRoutes);
 // const answerRoutes = require("./routes/answerRoute");
 // app.use("/api/answers", answerRoutes);
 
-app.listen(port, (err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log(`server is running on port ${port}`);
+async function start() {
+  try {
+    const result = await dbconnection.execute("SELECT 'test' ");
+    app.listen(port);
+    console.log("Connected");
+  } catch (err) {
+    console.log(err.message);
   }
-});
+}
+start();
