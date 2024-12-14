@@ -3,20 +3,20 @@ const express = require("express");
 const port = 3000;
 const app = express();
 
-//register routes
-app.post("/api/users/register", (req, res) => {
-  res.send("register user");
-});
+// user routes middleware file
 
-// login user
-app.post("/api/users/login", (req, res) => {
-  res.send("login user");
-});
+const userRoutes = require("./routes/userRoute");
 
-//check user
-app.get("/api/users/check", (req, res) => {
-  res.send("check user");
-});
+// user routes middleware
+app.use("/api/users", userRoutes);
+
+// // question routes middleware
+// const questionRoutes = require("./routes/questionRoute");
+// app.use("/api/questions", questionRoutes);
+
+// // answer routes middleware
+// const answerRoutes = require("./routes/answerRoute");
+// app.use("/api/answers", answerRoutes);
 
 app.listen(port, (err) => {
   if (err) {
