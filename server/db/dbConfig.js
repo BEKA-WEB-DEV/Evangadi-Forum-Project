@@ -1,15 +1,19 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
-const e = require("express");
+require("dotenv").config();
 
 const dbConnection = mysql.createPool({
   user: process.env.USER,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
-  connectionLimit: process.env.CONNECTION_LIMIT,
+  connectionLimit: 10,
   host: process.env.HOST,
 });
+console.log(process.env.USER);
+console.log(process.env.PASSWORD);
+console.log(process.env.DATABASE);
+console.log(process.env.HOST);
 
 module.exports = dbConnection.promise();
 // dbConnection.execute("SELECT 'test' ", function (error, results) {
