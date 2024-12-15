@@ -10,10 +10,10 @@ const dbConnection = mysql.createPool({
   connectionLimit: 10,
   host: process.env.HOST,
 });
-console.log(process.env.USER);
-console.log(process.env.PASSWORD);
-console.log(process.env.DATABASE);
-console.log(process.env.HOST);
+// console.log(process.env.USER);
+// console.log(process.env.PASSWORD);
+// console.log(process.env.DATABASE);
+// console.log(process.env.HOST);
 
 module.exports = dbConnection.promise();
 // dbConnection.execute("SELECT 'test' ", function (error, results) {
