@@ -4,10 +4,11 @@ const mysql = require("mysql2");
 const e = require("express");
 
 const dbConnection = mysql.createPool({
-  user: "evangadi-admin",
-  password: "bktessema",
-  database: "evangadi-db",
-  connectionLimit: 10,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
+  connectionLimit: process.env.CONNECTION_LIMIT,
+  host: process.env.HOST,
 });
 
 module.exports = dbConnection.promise();

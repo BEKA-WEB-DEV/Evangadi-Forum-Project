@@ -64,9 +64,10 @@ async function register(req, res) {
 
 //login
 async function login(req, res) {
-  const { usernameORemail, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!usernameORemail || !password) {
+  //Check if email and password are filled
+  if (!email || !password) {
     return res
       .status(StatusCodes.BAD_REQUEST)
       .json({ msg: "Please enter all required fields" });
@@ -74,30 +75,35 @@ async function login(req, res) {
 
   try {
     const [user] = await dbconnection.query(
-      "SELECT userid, username, password FROM users WHERE username = ? OR email = ?",
-      [usernameORemail, usernameORemail]
+      "SELECT userid, username, password FROM users WHERE email = ?",
+      [email]
     );
-    // Query the user by email or username
+
     if (user.length === 0) {
-      return res.status(StatusCodes.NOT_FOUND).json({ msg: "User not found" });
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json({ msg: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, user[0].password);
+
     if (!isMatch) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json({ msg: "Invalid credentials" });
+        .json({ msg: "Invalid email or password" });
+    } else {
+      //Generate JWT
+      const username = user[0].username;
+      const userid = user[0].userid;
+      const secret = process.env.JWT_SECRET;
+
+      const token = jwt.sign({ username, userid }, secret, {
+        expiresIn: "1d", // Token expires in 1 day
+      });
+      return res
+        .status(StatusCodes.OK)
+        .json({ msg: "Login successful", token });
     }
-
-    // Generate JWT token
-    const username = user[0].username;
-    const userid = user[0].userid;
-    const secret = process.env.JWT_SECRET;
-    const token = jwt.sign({ username, userid }, secret, {
-      expiresIn: "1d",
-    });
-
-    return res.status(StatusCodes.OK).json({ username, userid, token });
   } catch (err) {
     console.log(err.message);
     return res
@@ -110,7 +116,9 @@ async function login(req, res) {
 async function checkUser(req, res) {
   const username = req.body.username;
   const userid = req.body.userid;
-  return res.status(StatusCodes.OK).json({ username, userid });
+  return res
+    .status(StatusCodes.OK)
+    .json({ msg: "User found", username, userid });
 }
 
 module.exports = {
