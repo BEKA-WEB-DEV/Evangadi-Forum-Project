@@ -3,19 +3,22 @@ const cors = require("cors");
 require("dotenv").config();
 const port = 3000;
 const app = express();
-//auth middleware
+
+// Auth middleware
 const authMiddleware = require("./middleware/authMiddleware");
-//json middleware to extract data
+
+// JSON middleware to extract data
 app.use(express.json());
 
-//db connection
+// DB connection
 const dbconnection = require("./db/dbConfig");
 
-// test get request
+// Test GET request
 app.get("/", (req, res) => {
-  res.status(200).send("welcome-to Evangadi-");
+  res.status(200).send("welcome to Evangadi-Forum-Project");
 });
-//cors middleware
+
+// CORS middleware
 app.use(
   cors(
     (origins = [
@@ -24,27 +27,32 @@ app.use(
     ])
   )
 );
-// user routes middleware file
+
+// Static file middleware to serve uploaded files
+app.use("/uploads", express.static("uploads"));
+
+// User routes middleware file
 const userRoutes = require("./routes/userRoute");
 
-// user routes middleware
+// User routes middleware
 app.use("/api/users", userRoutes);
 
-// question routes middleware file
+// Question routes middleware file
 const questionRoutes = require("./routes/questionRoute");
 
-// question routes middleware
+// Question routes middleware
 app.use("/api/questions", authMiddleware, questionRoutes);
 
-// answer routes middleware file
+// Answer routes middleware file
 const answerRoutes = require("./routes/answerRoute");
-// answer routes middleware
+
+// Answer routes middleware
 app.use("/api/answers", authMiddleware, answerRoutes);
 
 async function start() {
   try {
     const result = await dbconnection.execute("SELECT 'test' ");
-    console.log("Connected");
+    console.log("Server Connected");
     await app.listen(port);
     console.log(`Server running on port ${port}`);
   } catch (err) {
@@ -52,3 +60,62 @@ async function start() {
   }
 }
 start();
+
+// const express = require("express");
+// const cors = require("cors");
+// require("dotenv").config();
+// const port = 3000;
+// const app = express();
+// //auth middleware
+// const authMiddleware = require("./middleware/authMiddleware");
+// //json middleware to extract data
+// app.use(express.json());
+
+// //db connection
+// const dbconnection = require("./db/dbConfig");
+
+// // test get request
+// app.get("/", (req, res) => {
+//   res.status(200).send("welcome-to Evangadi-");
+// });
+// //cors middleware
+// app.use(
+//   cors(
+//     (origins = [
+//       "http://localhost:3000",
+//       // "https://evangadi-forum-project-frontend.vercel.app/",
+//     ])
+//   )
+// );
+
+// // Static file middleware to serve uploaded files
+// app.use('/uploads', express.static('uploads'));
+
+// // user routes middleware file
+// const userRoutes = require("./routes/userRoute");
+
+// // user routes middleware
+// app.use("/api/users", userRoutes);
+
+// // question routes middleware file
+// const questionRoutes = require("./routes/questionRoute");
+
+// // question routes middleware
+// app.use("/api/questions", authMiddleware, questionRoutes);
+
+// // answer routes middleware file
+// const answerRoutes = require("./routes/answerRoute");
+// // answer routes middleware
+// app.use("/api/answers", authMiddleware, answerRoutes);
+
+// async function start() {
+//   try {
+//     const result = await dbconnection.execute("SELECT 'test' ");
+//     console.log("Server Connected");
+//     await app.listen(port);
+//     console.log(`Server running on port ${port}`);
+//   } catch (err) {
+//     console.log(err.message);
+//   }
+// }
+// start();

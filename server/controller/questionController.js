@@ -1,60 +1,145 @@
 const { StatusCodes } = require("http-status-codes");
 const dbConnection = require("../db/dbConfig");
 const crypto = require("crypto");
+const multer = require("multer");
+const path = require("path");
+
+// Configure Multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Directory to store uploaded files
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+  },
+});
+
+const upload = multer({ storage: storage });
 
 // post questions / ask questions
+// async function postQuestion(req, res) {
+//   const { userid, title, description, tag } = req.body;
+
+//   // Create a new date object
+//   const currentTimestamp = new Date();
+
+//   // Adjust the time by UTC+3 hours
+//   const adjustedDate = new Date(
+//     currentTimestamp.getTime() + 3 * 60 * 60 * 1000
+//   );
+
+//   // Format the date as 'YYYY-MM-DD HH:mm:ss'
+//   const formattedTimestamp = adjustedDate
+//     .toISOString()
+//     .slice(0, 19)
+//     .replace("T", " ");
+
+//   if (!userid || !title || !description) {
+//     return res
+//       .status(StatusCodes.BAD_REQUEST)
+//       .json({ message: "All fields are required" });
+//   }
+//   const questionid = crypto.randomBytes(10).toString("hex");
+//   try {
+//     await dbConnection.query(
+//       "insert into questions (questionid, userid, title, description, tag,createdAt) values ( ?, ?, ?, ?, ?,?)",
+//       [questionid, userid, title, description, tag, formattedTimestamp]
+//     );
+//     return res
+//       .status(StatusCodes.CREATED)
+//       .json({ message: "question posted successfully" });
+//   } catch (err) {
+//     //    console.log(err);
+//     return res
+//       .status(500)
+//       .json({ message: "something went wrong, please try again later" + err });
+//   }
+// }
 async function postQuestion(req, res) {
-  const { userid, title, description, tag } = req.body;
-  // Create a new date object
-  const currentTimestamp = new Date();
+  const uploadFiles = upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "audio", maxCount: 1 },
+  ]);
 
-  // Adjust the time by UTC+3 hours
-  const adjustedDate = new Date(
-    currentTimestamp.getTime() + 3 * 60 * 60 * 1000
-  );
+  uploadFiles(req, res, async (err) => {
+    if (err) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "File upload failed", error: err });
+    }
 
-  // Format the date as 'YYYY-MM-DD HH:mm:ss'
-  const formattedTimestamp = adjustedDate
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", " ");
+    const { userid, title, description, tag } = req.body;
+    const image = req.files?.image ? req.files.image[0].path : null;
+    const audio = req.files?.audio ? req.files.audio[0].path : null;
 
-  if (!userid || !title || !description) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: "All fields are required" });
-  }
-  const questionid = crypto.randomBytes(10).toString("hex");
-  try {
-    await dbConnection.query(
-      "insert into questions (questionid, userid, title, description, tag,createdAt) values ( ?, ?, ?, ?, ?,?)",
-      [questionid, userid, title, description, tag, formattedTimestamp]
+    // Create a new date object
+    const currentTimestamp = new Date();
+    const adjustedDate = new Date(
+      currentTimestamp.getTime() + 3 * 60 * 60 * 1000
     );
-    return res
-      .status(StatusCodes.CREATED)
-      .json({ message: "question posted successfully" });
-  } catch (err) {
-    //    console.log(err);
-    return res
-      .status(500)
-      .json({ message: "something went wrong, please try again later" + err });
-  }
+    const formattedTimestamp = adjustedDate
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+
+    if (!userid || !title || !description) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "All fields are required" });
+    }
+
+    const questionid = crypto.randomBytes(10).toString("hex");
+
+    try {
+      await dbConnection.query(
+        "INSERT INTO questions (questionid, userid, title, description, tag, createdAt, image, audio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          questionid,
+          userid,
+          title,
+          description,
+          tag,
+          formattedTimestamp,
+          image,
+          audio,
+        ]
+      );
+
+      return res
+        .status(StatusCodes.CREATED)
+        .json({ msg: "Question posted successfully" });
+    } catch (err) {
+      console.error(err);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        msg: "Something went wrong, please try again later",
+        error: err,
+      });
+    }
+  });
 }
 
 // get all questions
 async function getAllQuestions(req, res) {
   try {
-    const [questions] =
-      await dbConnection.query(`select q.questionid, q.title, q.description,q.createdAt, u.username from questions q   
-     inner join users u on q.userid = u.userid  order by q.createdAt desc`);
-    return res.status(StatusCodes.OK).json({
-      message: questions,
-    });
+    const [questions] = await dbConnection.query(
+      `SELECT 
+      q.questionid, 
+      q.title, 
+      q.description, 
+      q.createdAt, 
+      q.image, 
+      q.audio, 
+      u.username 
+      FROM questions q
+      INNER JOIN users u ON q.userid = u.userid
+      ORDER BY q.createdAt DESC`
+    );
+    return res.status(StatusCodes.OK).json({ msg: questions });
   } catch (err) {
     console.log(err);
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "something went wrong, please try again later" });
+      .json({ msg: "something went wrong, please try again later" });
   }
 }
 
@@ -69,22 +154,26 @@ async function getQuestionAndAnswer(req, res) {
           q.title, 
           q.description, 
           q.createdAt AS question_createdAt,
-          u2.username as question_username,
+          q.image,
+          q.audio,
+          u2.username AS question_username,
           a.answerid, 
           a.userid AS answer_userid, 
           a.answer,
           a.createdAt,
-          u.username as answer_username
+          u.username AS answer_username
        FROM 
           questions q   
        LEFT JOIN 
           answers a ON q.questionid = a.questionid
-          LEFT JOIN users u on u.userid = a.userid
-          left join users u2 on u2.userid = q.userid
+       LEFT JOIN 
+          users u ON u.userid = a.userid
+       LEFT JOIN 
+          users u2 ON u2.userid = q.userid
        WHERE 
           q.questionid = ?
-          order by a.createdAt desc
-          `,
+       ORDER BY 
+          a.createdAt DESC`,
       [questionid]
     );
 
@@ -92,7 +181,7 @@ async function getQuestionAndAnswer(req, res) {
     if (rows.length === 0) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Question not found" });
+        .json({ msg: "Question not found" });
     }
 
     // Reshape the data to include answers under the question
@@ -100,6 +189,8 @@ async function getQuestionAndAnswer(req, res) {
       id: rows[0].questionid,
       title: rows[0].title,
       description: rows[0].description,
+      image: rows[0].image,
+      audio: rows[0].audio,
       qtn_createdAt: rows[0].question_createdAt,
       qtn_username: rows[0].question_username,
       answers: rows
@@ -110,15 +201,15 @@ async function getQuestionAndAnswer(req, res) {
           answer: answer.answer,
           createdAt: answer.createdAt,
         }))
-        .filter((answer) => answer.answerid !== null), // Filter out any null answers
+        .filter((answer) => answer.answerid !== null),
     };
 
     res.status(StatusCodes.OK).json(questionDetails);
   } catch (error) {
     console.error(error);
     res
-      .status(500)
-      .json({ message: "Error fetching question details" + error });
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: "Error fetching question details" + error });
   }
 }
 module.exports = { postQuestion, getAllQuestions, getQuestionAndAnswer };
