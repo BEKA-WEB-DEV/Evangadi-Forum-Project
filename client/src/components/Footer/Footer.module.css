@@ -1,0 +1,73 @@
+.footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  background-color: #2f3541;
+  color: #ffffff;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+}
+
+.logoSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.evangadiPrefix {
+  color: #f18f01; /* Orange for 'EV' */
+}
+
+.socialIcons {
+  display: flex;
+  margin-top: 1rem;
+}
+
+.icon {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin: 0 0.5rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.icon:hover {
+  color: #f18f01; /* Hover effect */
+}
+
+.linksSection,
+.contactSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.linksSection h3,
+.contactSection h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1.2rem;
+}
+
+.linksSection ul {
+  list-style: none;
+  padding: 0;
+}
+
+.linksSection li {
+  margin: 0.5rem 0;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.linksSection li:hover {
+  color: #f18f01; /* Orange hover */
+}
+
+.contactSection p {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+}

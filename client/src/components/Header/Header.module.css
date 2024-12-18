@@ -1,0 +1,162 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Header Container */
+.header {
+  min-width: 500px;
+  min-height: 10vh;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgb(81 107 152 / 16%);
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Outer Container to Center Content */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  margin: 20px 0;
+}
+
+/* Inner Container for Flex Alignment */
+.innerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Evangadi Logo Styling */
+img {
+  width: 200px;
+}
+
+/* Navigation Links Container */
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+/* Individual Navigation Links */
+.navLinks > a:not(:last-child) {
+  color: #3b455a;
+  text-decoration: none;
+  font-size: 20px;
+  margin-right: 20px;
+  font-family: Lato, sans-serif;
+  font-weight: bold;
+  display: inline-block;
+  transition: color 0.3s ease;
+}
+
+.navLinks a:hover:not(:last-child) {
+  color: #ff8500;
+}
+
+/* Login Button */
+.login {
+  background-color: #516cf0;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.login:hover {
+  background-color: #3455fd;
+}
+
+/* Logout Button */
+.logoutButton {
+  background-color: #ff4d4d; /* Red logout button */
+  color: #ffffff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.logoutButton:hover {
+  background-color: #e04444; /* Slightly darker red */
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+  .navLinks {
+    gap: 10px;
+    font-size: 0.9rem;
+  }
+
+  img {
+    height: 30px;
+  }
+}
+
+/* .header {
+  min-width: 500px;
+  min-height: 10vh;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgb(81 107 152 / 16%);
+  justify-content: center;
+}
+img {
+  width: 200px;
+}
+
+.container {
+  align-items: center;
+  width: 100%;
+}
+
+.innerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navLinks {
+  width: 450px;
+  align-items: center;
+}
+.navLinks > a {
+  color: #3b455a;
+  text-decoration: none;
+  font-size: 15px;
+  margin-right: 20px;
+  font-family: Lato, sans-serif;
+  font-weight: bold;
+  display: inline-block;
+}
+
+/* .navLinks > a:hover {
+  color: #ff8500;
+}
+.navLinks .login {
+  border: 3px solid #516cf0;
+}
+
+.navLinks .login:hover {
+  background-color: #516cf0;
+  color: #ffffff;
+} */
