@@ -1,3 +1,11 @@
+// utility/axios.js
+import axios from "axios";
+
+export const axiosInstance = axios.create({
+  baseURL: "http://localhost:3000/api", // Replace with your backend URL
+  timeout: 5000,
+});
+
 const API_URL = "http://localhost:3000/api";
 
 export const fetchQuestions = async () => {

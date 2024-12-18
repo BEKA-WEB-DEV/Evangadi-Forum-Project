@@ -1,32 +1,45 @@
-import React from "react";
+import { createContext, useEffect, useState } from "react";
 import "./App.css";
-import { Routes, Route } from "react-router-dom";
-// import Header from "./components/Header/Header";
-// import Footer from "./components/Footer/Footer";
-import Home from "./pages/Home/Home";
-import AuthPage from "./pages/AuthPage/AuthPage";
-import Question from "./pages/Question/Question";
-import Answer from "./pages/Answer/Answer";
-import About from "./components/About/About";
+import { useNavigate } from "react-router-dom";
+import { axiosInstance } from "./utility/axios";
+import AppRouter from "./routes/AppRouter.jsx";
+
+// Create a context for the user data
+export const UserState = createContext();
 
 function App() {
+  const [user, setUser] = useState({});
+  const navigate = useNavigate();
+
+  // Fetch user data
+  const getUserData = async () => {
+    try {
+      const token = localStorage.getItem("EV-Forum-token-G3-APR2024"); // Get the token from local storage
+      if (!token) {
+        navigate("/auth"); // Redirect to auth if no token is found
+        return;
+      }
+
+      const response = await axiosInstance.get("/user/check", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setUser(response.data); // Store user data in state
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      navigate("/auth"); // Redirect to auth on error
+    }
+  };
+
+  useEffect(() => {
+    getUserData(); // Fetch user data when the component mounts
+  }, []);
+
   return (
-    <>
-      {/* Header Component */}
-      {/* <Header /> */}
-
-      {/* Routing */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/question/:id" element={<Question />} />
-        <Route path="/answer/:id" element={<Answer />} />
-      </Routes>
-
-      {/* Footer Component */}
-      {/* <Footer /> */}
-    </>
+    // Provide user data and setter to the entire app
+    <UserState.Provider value={{ user, setUser }}>
+      <AppRouter />
+    </UserState.Provider>
   );
 }
 

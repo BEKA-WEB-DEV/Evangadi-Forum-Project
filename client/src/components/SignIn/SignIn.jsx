@@ -304,3 +304,138 @@ function SignIn({ onSwitch }) {
 }
 
 export default SignIn;
+// import { useState } from "react";
+// import { axiosInstance } from "../../utility/axios.js";
+// import classes from "./Signin.module.css";
+// import { Link } from "react-router-dom";
+// import Swal from "sweetalert2";
+
+// function SignIn({ onSwitch }) {
+//   const [error, setError] = useState(null);
+//   const [success, setSuccess] = useState(null);
+//   const [showPassword, setShowPassword] = useState(false);
+
+//   const [formData, setFormData] = useState({
+//     usernameOrEmail: "",
+//     password: "",
+//   });
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData({
+//       ...formData,
+//       [name]: value,
+//     });
+//   };
+
+//   const handleTogglePassword = () => {
+//     setShowPassword((prev) => !prev);
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!formData.usernameOrEmail || !formData.password) {
+//       setError("Please fill in both fields.");
+//       return;
+//     }
+
+//     try {
+//       const response = await axiosInstance.post("/user/Login", {
+//         usernameOrEmail: formData.usernameOrEmail,
+//         password: formData.password,
+//       });
+
+//       // Successful login
+//       if (response.status === 200) {
+//         setSuccess("Login successful! Redirecting...");
+//         localStorage.setItem("EV-Forum-token-G3-APR2024", response.data.token); // Store the token in local storage
+//         await Swal.fire({
+//           title: "Success!",
+//           text: "User logged in successfully!",
+//           icon: "success",
+//           confirmButtonText: "OK",
+//         });
+
+//         setError(null);
+//         window.location.href = "/"; // Navigate to the home page
+//       } else {
+//         // Unexpected status codes
+//         throw new Error(response.data.msg || "Login failed.");
+//       }
+//     } catch (err) {
+//       const errorMessage =
+//         err.response?.data?.msg || "Error logging in. Please try again.";
+//       setError(errorMessage);
+
+//       await Swal.fire({
+//         title: "Error",
+//         text: errorMessage,
+//         icon: "error",
+//         confirmButtonText: "OK",
+//       });
+
+//       setSuccess(null);
+//     }
+//   };
+
+//   return (
+//     <div className={classes.formcontainer}>
+//       <div className={classes.innerContainer}>
+//         <div className={classes.heading}>
+//           <h2 className={classes.title}>Login to your account</h2>
+//           <p className={classes.signuptext}>
+//             Don't have an account?{" "}
+//             <Link
+//               to="/signup"
+//               style={{ cursor: "pointer", color: "var(--primary-color)" }}
+//             >
+//               Create a new account
+//             </Link>
+//           </p>
+//           {error && (
+//             <p className={classes.error} style={{ marginBottom: "10px" }}>
+//               {error}
+//             </p>
+//           )}
+//           {success && <p className={classes.success}>{success}</p>}
+//         </div>
+//         <form onSubmit={handleSubmit}>
+//           <input
+//             type="text"
+//             name="usernameOrEmail"
+//             placeholder="Username or Email"
+//             value={formData.usernameOrEmail}
+//             onChange={handleChange}
+//             required
+//           />
+//           <div className={classes.passwordinput}>
+//             <input
+//               type={showPassword ? "text" : "password"}
+//               name="password"
+//               placeholder="Password"
+//               value={formData.password}
+//               onChange={handleChange}
+//               required
+//             />
+//             <button
+//               type="button"
+//               onClick={handleTogglePassword}
+//               className={classes.togglePassword}
+//             >
+//               {showPassword ? "🙉" : "🙈"}
+//             </button>
+//           </div>
+//           <p className={classes.forgotpasswordtext}>
+//             <Link to="/forgetPass">Forgot password?</Link>
+//           </p>
+//           <button type="submit" className={classes.submitbtn}>
+//             Login
+//           </button>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default SignIn;
