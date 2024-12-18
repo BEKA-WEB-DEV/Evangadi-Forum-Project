@@ -1,13 +1,18 @@
 import React from "react";
 import classes from "./Footer.module.css";
 import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
-
+import { Link } from "react-router-dom";
+import footerLogo from "../../assets/Images/evangadi-logo-footer.png";
 const Footer = () => {
   return (
     <footer className={classes.footer}>
       <div className={classes.logoSection}>
         <h2 className={classes.logo}>
-          <span className={classes.evangadiPrefix}>EV</span>ANGADI
+          <span className={classes.evangadiPrefix}>
+            <Link to="/">
+              <img src={footerLogo} alt=" evangagadi logo" />
+            </Link>
+          </span>
         </h2>
         <div className={classes.socialIcons}>
           <FaFacebookF className={classes.icon} />
