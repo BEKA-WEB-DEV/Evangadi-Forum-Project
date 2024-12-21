@@ -1,16 +1,28 @@
 const express = require("express");
 const router = express.Router();
 
-const { register, login, checkUser } = require("../controller/userController");
+// Authentication middleware
 const authMiddleware = require("../middleware/authMiddleware");
 
-//register routes
+// User controllers
+const {
+  register,
+  login,
+  checkUser,
+  logOut,
+} = require("../controller/userController");
+
+// Register route
 router.post("/register", register);
 
-// login user
+// Login route
 router.post("/login", login);
 
-//check user
+// Check user route
 router.get("/check", authMiddleware, checkUser);
 
+// Logout route
+router.delete("/logout", logOut);
+
+// Export the router
 module.exports = router;

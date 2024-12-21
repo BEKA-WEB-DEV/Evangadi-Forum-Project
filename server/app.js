@@ -1,121 +1,41 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
-const port = 3000;
 const app = express();
+require("dotenv").config();
+const dbConnection = require("./db/dbConfig");
 
-// Auth middleware
-const authMiddleware = require("./middleware/authMiddleware");
-
-// JSON middleware to extract data
+const answerRouter = require("./routes/answerRoutes");
+const questionRouter = require("./routes/questionRoutes");
+const userRouter = require("./routes/userRoutes");
+app.use(cors());
+// json middleware to extract json data
 app.use(express.json());
 
-// DB connection
-const dbconnection = require("./db/dbConfig");
+app.use("api/answer", answerRouter);
 
-// Test GET request
+const port = 3003;
+const authMiddleware = require("./middleware/authMiddleware");
+//user routes middleware
+app.use("/api/user", userRouter); //http://localhost:3003/api/user/register
+//question routes middleware
+app.use("/api", authMiddleware, questionRouter); //http://localhost:3003/api/question
+//answer routes middleware
+app.use("/api", authMiddleware, answerRouter);
+//using get http method (to request data from server)
 app.get("/", (req, res) => {
-  res.status(200).send("welcome to Evangadi-Forum-Project");
+  res.send("API Working");
 });
 
-// CORS middleware
-app.use(
-  cors(
-    (origins = [
-      "http://localhost:3000",
-      // "https://evangadi-forum-project-frontend.vercel.app/",
-    ])
-  )
-);
-
-// Static file middleware to serve uploaded files
-app.use("/uploads", express.static("uploads"));
-
-// User routes middleware file
-const userRoutes = require("./routes/userRoute");
-
-// User routes middleware
-app.use("/api/users", userRoutes);
-
-// Question routes middleware file
-const questionRoutes = require("./routes/questionRoute");
-
-// Question routes middleware
-app.use("/api/questions", authMiddleware, questionRoutes);
-
-// Answer routes middleware file
-const answerRoutes = require("./routes/answerRoute");
-
-// Answer routes middleware
-app.use("/api/answers", authMiddleware, answerRoutes);
-
-async function start() {
+//new method of server starter with db connection
+const startConnection = async () => {
   try {
-    const result = await dbconnection.execute("SELECT 'test' ");
-    console.log("Server Connected");
+    const result = await dbConnection.execute("select 'test'");
+    console.log(result);
     await app.listen(port);
-    console.log(`Server running on port ${port}`);
-  } catch (err) {
-    console.log(err.message);
+    console.log("database connected");
+    console.log(`server running on {http://localhost}:${port}`);
+  } catch (error) {
+    console.log(error.message);
   }
-}
-start();
-
-// const express = require("express");
-// const cors = require("cors");
-// require("dotenv").config();
-// const port = 3000;
-// const app = express();
-// //auth middleware
-// const authMiddleware = require("./middleware/authMiddleware");
-// //json middleware to extract data
-// app.use(express.json());
-
-// //db connection
-// const dbconnection = require("./db/dbConfig");
-
-// // test get request
-// app.get("/", (req, res) => {
-//   res.status(200).send("welcome-to Evangadi-");
-// });
-// //cors middleware
-// app.use(
-//   cors(
-//     (origins = [
-//       "http://localhost:3000",
-//       // "https://evangadi-forum-project-frontend.vercel.app/",
-//     ])
-//   )
-// );
-
-// // Static file middleware to serve uploaded files
-// app.use('/uploads', express.static('uploads'));
-
-// // user routes middleware file
-// const userRoutes = require("./routes/userRoute");
-
-// // user routes middleware
-// app.use("/api/users", userRoutes);
-
-// // question routes middleware file
-// const questionRoutes = require("./routes/questionRoute");
-
-// // question routes middleware
-// app.use("/api/questions", authMiddleware, questionRoutes);
-
-// // answer routes middleware file
-// const answerRoutes = require("./routes/answerRoute");
-// // answer routes middleware
-// app.use("/api/answers", authMiddleware, answerRoutes);
-
-// async function start() {
-//   try {
-//     const result = await dbconnection.execute("SELECT 'test' ");
-//     console.log("Server Connected");
-//     await app.listen(port);
-//     console.log(`Server running on port ${port}`);
-//   } catch (err) {
-//     console.log(err.message);
-//   }
-// }
-// start();
+};
+startConnection();
