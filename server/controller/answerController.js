@@ -2,20 +2,17 @@ const dbConnection = require("../db/dbConfig");
 const { StatusCodes } = require("http-status-codes");
 
 async function postAnswer(req, res) {
-  // res.send("answer")
-  const { questionid, answer } = req.body;
-  // no need to check question id becouse it will be avaliable with the question so we
-  // will check only answer
+  const { questionid, answer, image, audio } = req.body;
   if (!answer) {
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "please provide answer" });
+      .json({ msg: "Please provide an answer" });
   }
   try {
     const userid = req.user.userid;
     await dbConnection.query(
-      "INSERT INTO answers(questionid, answer, userid, answerid, image, audio) VALUES(?,?,?,?,?,?)",
-      [questionid, answer, userid, answerid, image, audio]
+      "INSERT INTO answers(questionid, answer, userid, image, audio) VALUES(?,?,?,?,?)",
+      [questionid, answer, userid, image, audio]
     );
 
     return res
@@ -28,15 +25,16 @@ async function postAnswer(req, res) {
       .json({ msg: "An unexpected error occurred." });
   }
 }
-//Solomon
+
 async function getAnswer(req, res) {
   const questionid = req.params.questionid;
-  console.log(questionid);
   try {
-    //select * from answers where questionId=?,[questionId];
     const [answers] = await dbConnection.query(
       `SELECT 
-        q.questionid, q.answer, q.answerid, q.image, q.audio, q.userid, u.username, FROM answers AS q JOIN users AS u ON q.userid = u.userid WHERE q.questionid = ?`,
+        a.answerid, a.answer, a.image, a.audio, a.userid, a.createdAt, u.username 
+      FROM answers AS a 
+      JOIN users AS u ON a.userid = u.userid 
+      WHERE a.questionid = ?`,
       [questionid]
     );
     if (!answers || answers.length === 0) {

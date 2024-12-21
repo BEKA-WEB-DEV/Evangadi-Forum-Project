@@ -1,15 +1,15 @@
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 
-//when user send data they will use token to authenticate them
+// When user sends data, they will use token to authenticate them
 const authMiddleware = async (req, res, next) => {
-  //take token from users (generated token)
+  // Take token from users (generated token)
   const authHeader = req.headers.authorization;
-  //check if  token is not available
+  // Check if token is not available
   if (!authHeader || !authHeader.startsWith("Bearer")) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
       success: false,
-      message: "Not Authorized Login again",
+      message: "Not Authorized. Login again.",
     });
   }
   const token = authHeader.split(" ")[1];
@@ -17,15 +17,15 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const { username, userid } = jwt.verify(token, process.env.JWT_SECRET);
-    //set user with userName & userId
+    // Set user with userName & userId
     req.user = { username, userid };
-    // call callback function to pass the data up on authorization.
+    // Call callback function to pass the data upon authorization.
     next();
   } catch (error) {
     console.log(error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    return res.status(StatusCodes.UNAUTHORIZED).json({
       success: false,
-      message: "Something went wrong, try again later!",
+      message: "Not Authorized. Login again.",
     });
   }
 };
