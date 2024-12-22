@@ -7,77 +7,75 @@ const app = express();
 const dbConnection = require("../db/dbConfig");
 
 async function postQuestion(req, res) {
-  const { title, description } = req.body;
+  const { title, description, tag, image, audio } = req.body;
+  const { userid } = req.user;
+  console.log(userid)
 
-  // Check for missing items
+  console.log(title, description, tag, image, audio);
+
+  // Ensure that title and description are provided
   if (!title || !description) {
-    return res.status(StatusCodes.BAD_REQUEST).json({
-      msg: "Please provide all required fields!",
-    });
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ msg: "Please provide all required fields: title and description." });
   }
-  const generateTag = (title) => {
-    const extractionResult = KeywordExtractor.extract(title, {
-      language: "english",
-      remove_digits: true,
-      return_changed_case: true,
-      remove_duplicates: true,
-    });
-    return extractionResult.length > 0 ? extractionResult[0] : "general";
-  };
+
+  // Ensure that the userId is available (Authentication check)
+  if (!userid) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ msg: "User not authenticated." });
+  }
+
   try {
-    // get userid from user
-    const { userId } = req.user;
-
-    // get a unique identifier for questionid so two questions do not end up having the same id. crypto built in node module.
-    const questionId = crypto.randomBytes(16).toString("hex");
-
-    const tag = generateTag(title);
-
-    // Insert question into database
     await dbConnection.query(
-      "INSERT INTO questions ( userId, questionId, title, description, tag, created_at) VALUES (?,?,?,?,?,?)",
-      [userId, questionId, title, description, tag, new Date()]
+      "INSERT INTO questions (userId, title, description, tag, image, audio) VALUES (?, ?, ?, ?, ?, ?)",
+      [userid, title, description, tag, image, audio]
     );
-
-    return res.status(StatusCodes.CREATED).json({
-      msg: "Question created successfully",
-    });
+    return res
+      .status(StatusCodes.CREATED)
+      .json({ msg: "Question created successfully" });
   } catch (error) {
-    console.log(error.message);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      msg: "An unexpected error occurred.",
-    });
+    console.error(error);
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: "An error occurred while creating the question." });
   }
 }
 
 async function getSingleQuestion(req, res) {
-  const { questionId } = req.params;
-  console.log(questionId);
-  if (!questionId) {
+  const { questionid } = req.params;
+
+
+
+  // Ensure that questionId is provided
+  if (!questionid) {
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "Invalid question ID" });
+      .json({ msg: "Invalid or missing question ID." });
   }
+
   try {
     // Query the database to get the question details
     const [question] = await dbConnection.query(
-      "SELECT * FROM questions WHERE questionId =?",
-      [questionId]
+      "SELECT * FROM questions WHERE questionId = ?",
+      [questionid]
     );
 
-    //  If no question found, return 404
+    // If no question found, return 404
     if (question.length === 0) {
       return res
         .status(StatusCodes.NOT_FOUND)
         .json({ msg: "Question not found" });
     }
+
     // Return the question details
     return res.status(StatusCodes.OK).json({ question: question[0] });
   } catch (error) {
     console.error(error.message);
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ msg: "An unexpected error occurred" });
+      .json({ msg: "An error occurred while fetching the question." });
   }
 }
 
@@ -87,14 +85,15 @@ async function getAllQuestions(req, res) {
     const [questions] = await dbConnection.query("SELECT * FROM questions"); // Fetch data from 'questions' table
 
     // Send the response JSON payload
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       success: true,
       count: questions.length, // Number of questions
       data: questions, // Array of questions
     });
   } catch (error) {
     // Handle server errors
-    res.status(500).json({
+    console.error(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Internal Server Error",
     });

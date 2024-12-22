@@ -6,7 +6,7 @@ const authMiddleware = async (req, res, next) => {
   // Take token from users (generated token)
   const authHeader = req.headers.authorization;
   // Check if token is not available
-  if (!authHeader || !authHeader.startsWith("Bearer")) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
       success: false,
       message: "Not Authorized. Login again.",

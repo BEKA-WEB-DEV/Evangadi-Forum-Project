@@ -31,7 +31,7 @@ async function getAnswer(req, res) {
   try {
     const [answers] = await dbConnection.query(
       `SELECT 
-        a.answerid, a.answer, a.image, a.audio, a.userid, a.createdAt, u.username 
+        a.answerid, a.answer, a.image, a.audio, a.userid, u.username 
       FROM answers AS a 
       JOIN users AS u ON a.userid = u.userid 
       WHERE a.questionid = ?`,

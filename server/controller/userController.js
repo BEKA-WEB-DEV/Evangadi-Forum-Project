@@ -75,7 +75,9 @@ async function login(req, res) {
     });
     console.log(token);
 
-    return res.status(StatusCodes.OK).json({ msg: "user login successfull" });
+    return res
+      .status(StatusCodes.OK)
+      .json({ token, msg: "user login successful" });
   } catch (error) {
     console.log(error.message);
     return res
@@ -83,11 +85,13 @@ async function login(req, res) {
       .json({ msg: "something went wrong, try again later!" });
   }
 }
+
 async function checkUser(req, res) {
   const username = req.user.username;
   const userid = req.user.userid;
   res.status(StatusCodes.OK).json({ msg: "valid user", username, userid });
 }
+
 async function logOut(req, res) {
   return res.status(StatusCodes.OK).json({ msg: "successfuly logout" });
 }
