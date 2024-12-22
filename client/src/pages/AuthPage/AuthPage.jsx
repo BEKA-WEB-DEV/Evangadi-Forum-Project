@@ -4,8 +4,10 @@ import SignIn from "../../components/SignIn/SignIn";
 import Layout from "../../components/Layout/Layout";
 import classes from "./AuthPage.module.css";
 import About from "../../components/About/About";
+import { useLocation } from "react-router-dom";
 
 function AuthPage() {
+  const navStateData = useLocation();
   const [isSignIn, setIsSignUp] = useState(true);
 
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -28,7 +30,7 @@ function AuthPage() {
             }`}
           >
             {isSignIn ? (
-              <SignIn onSwitch={toggleForm} />
+              <SignIn onSwitch={toggleForm} useLocData={navStateData} />
             ) : (
               <SignUp onSwitch={toggleForm} />
             )}

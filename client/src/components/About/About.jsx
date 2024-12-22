@@ -20,9 +20,11 @@ function About() {
           network here.
         </p>
 
-        <div className={classes.how_it_works_btn}>
-          <Link to="/">HOW IT WORKS</Link>
-        </div>
+        <button className={classes.how_it_works_btn}>
+          <Link to="#" style={{ color: "white", textDecoration: "none" }}>
+            HOW IT WORKS
+          </Link>
+        </button>
       </div>
     </div>
   );

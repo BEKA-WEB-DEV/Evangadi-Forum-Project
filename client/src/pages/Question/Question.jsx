@@ -1,113 +1,18 @@
-// import React, { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-
-// function Question() {
-//   const { id } = useParams();
-//   const [question, setQuestion] = useState({});
-//   const [answers, setAnswers] = useState([]);
-
-//   useEffect(() => {
-//     // Fetch question details
-//     fetch(`/api/question/${id}`)
-//       .then((res) => res.json())
-//       .then((data) => setQuestion(data));
-
-//     // Fetch answers for the question
-//     fetch(`/api/answer/${id}`)
-//       .then((res) => res.json())
-//       .then((data) => setAnswers(data));
-//   }, [id]);
-
-//   return (
-//     <div>
-//       <h1>{question.title}</h1>
-//       <p>{question.body}</p>
-
-//       {/* Render Question Media */}
-//       {question.image && (
-//         <img
-//           src={question.image}
-//           alt="Question Media"
-//           style={{ maxWidth: "100%" }}
-//         />
-//       )}
-//       {question.audio && (
-//         <audio controls>
-//           <source src={question.audio} type="audio/mpeg" />
-//           Your browser does not support the audio element.
-//         </audio>
-//       )}
-
-//       <h2>Answers</h2>
-//       {answers.map((ans) => (
-//         <div key={ans.id}>
-//           <p>{ans.text}</p>
-
-//           {/* Render Answer Media */}
-//           {ans.image && (
-//             <img
-//               src={ans.image}
-//               alt="Answer Media"
-//               style={{ maxWidth: "100%" }}
-//             />
-//           )}
-//           {ans.audio && (
-//             <audio controls>
-//               <source src={ans.audio} type="audio/mpeg" />
-//               Your browser does not support the audio element.
-//             </audio>
-//           )}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-// export default Question;
-
-// // import React, { useEffect, useState } from "react";
-// // import { useParams } from "react-router-dom";
-// // import { fetchQuestionDetails, fetchAnswers } from "../utils/api";
-
-// // function Question() {
-// //   const { id } = useParams();
-// //   const [question, setQuestion] = useState({});
-// //   const [answers, setAnswers] = useState([]);
-
-// //   useEffect(() => {
-// //     fetchQuestionDetails(id).then(setQuestion);
-// //     fetchAnswers(id).then(setAnswers);
-// //   }, [id]);
-
-// //   return (
-// //     <div>
-// //       <h1>{question.title}</h1>
-// //       <p>{question.body}</p>
-// //       <h2>Answers</h2>
-// //       {answers.map((ans) => (
-// //         <p key={ans.id}>{ans.text}</p>
-// //       ))}
-// //     </div>
-// //   );
-// // }
-
-// // export default Question;
-
 import { useEffect, useState, useContext } from "react";
 import classes from "./Question.module.css";
-import { axiosInstance } from "../../utility/axios.js";
+import { axiosInstance } from "../../utility/axios"; // Use Axios for API calls
 import QuestionCard from "../../components/QuestionCard/QuestionCard.jsx";
 import Loader from "../../components/Loader/Loader.jsx";
 import { UserState } from "../../App.js";
 
 function Question() {
-  const [questions, setQuestions] = useState([]); // Store all questions
+  const [questions, setQuestions] = useState([]); // Initialize as an empty array
   const [loading, setLoading] = useState(false); // Loader state
   const [searchQuery, setSearchQuery] = useState(""); // Search query state
   const [currentPage, setCurrentPage] = useState(1); // Current page state
   const questionsPerPage = 5; // Number of questions per page
 
-  const { user } = useContext(UserState);
+  const { users } = useContext(UserState);
 
   // Fetch questions from API
   useEffect(() => {
@@ -115,9 +20,10 @@ function Question() {
       setLoading(true);
       try {
         const response = await axiosInstance.get("/questions");
-        setQuestions(response.data.message); // Set questions from API response
+        setQuestions(response.data.data || []); // Set questions from API response or empty array
       } catch (error) {
         console.error("Error fetching questions:", error);
+        setQuestions([]); // Set to empty array on error
       } finally {
         setLoading(false);
       }
@@ -192,8 +98,8 @@ function Question() {
               questionTitle={question.title}
               description={question.description}
               question_date={question.createdAt}
-              imageUrl={question.imageUrl} // Pass imageUrl
-              audioUrl={question.audioUrl} // Pass audioUrl
+              imageUrl={question.image} // Pass imageUrl
+              audioUrl={question.audio} // Pass audioUrl
             />
           ))}
 

@@ -1,13 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import classes from "./Header.module.css";
 import EvangadiLogo from "../../assets/Images/evangadi-logo-header.png";
 
 function Header() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("Evandadi-Forum-token-JUN2024");
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("Evandadi-Forum-token-JUN2024");
+    setIsLoggedIn(false);
     navigate("/auth");
   };
 
@@ -22,9 +29,9 @@ function Header() {
           </div>
 
           <nav className={classes.navLinks}>
-            <Link to="/">Home</Link>
+            {isLoggedIn && <Link to="/">Home</Link>}
             <Link to="/">How It Works</Link>
-            {localStorage.getItem("token") ? (
+            {isLoggedIn ? (
               <button className={classes.logoutButton} onClick={handleLogout}>
                 Log Out
               </button>

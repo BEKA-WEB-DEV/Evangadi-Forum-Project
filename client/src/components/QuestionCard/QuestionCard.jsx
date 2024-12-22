@@ -20,7 +20,7 @@ function QuestionCard({
 
   return (
     <Link
-      to={`/question/${id}`}
+      to={`/questions/${id}`}
       style={{ textDecoration: "none", color: "black" }}
     >
       <div className={classes.question_holder}>

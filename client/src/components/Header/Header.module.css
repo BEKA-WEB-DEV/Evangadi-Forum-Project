@@ -80,7 +80,10 @@ img {
 }
 
 .login:hover {
-  background-color: #3455fd;
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+  border: none;
+  text-decoration: none;
 }
 
 /* Logout Button */
