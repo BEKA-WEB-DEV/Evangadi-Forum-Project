@@ -5,22 +5,23 @@ const KeywordExtractor = require("keyword-extractor");
 // Initialize App
 const app = express();
 const dbConnection = require("../db/dbConfig");
+// const multer = require("multer");
+// const upload = multer({ dest: "uploads/" }); // Specify upload directory
 
 async function postQuestion(req, res) {
-  const { title, description, tag, image, audio } = req.body;
+  const { title, description, tag } = req.body;
   const { userid } = req.user;
-  console.log(userid)
 
-  console.log(title, description, tag, image, audio);
+  const image = req.files?.image?.[0]?.path || null;
+  const audio = req.files?.audio?.[0]?.path || null;
 
-  // Ensure that title and description are provided
+  // Validation
   if (!title || !description) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ msg: "Please provide all required fields: title and description." });
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      msg: "Please provide all required fields: title and description.",
+    });
   }
 
-  // Ensure that the userId is available (Authentication check)
   if (!userid) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
@@ -29,7 +30,7 @@ async function postQuestion(req, res) {
 
   try {
     await dbConnection.query(
-      "INSERT INTO questions (userId, title, description, tag, image, audio) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO questions (userid, title, description, tag, image, audio) VALUES (?, ?, ?, ?, ?, ?)",
       [userid, title, description, tag, image, audio]
     );
     return res
@@ -46,9 +47,6 @@ async function postQuestion(req, res) {
 async function getSingleQuestion(req, res) {
   const { questionid } = req.params;
 
-
-
-  // Ensure that questionId is provided
   if (!questionid) {
     return res
       .status(StatusCodes.BAD_REQUEST)
@@ -56,21 +54,33 @@ async function getSingleQuestion(req, res) {
   }
 
   try {
-    // Query the database to get the question details
+    // Fetch the question and related answers
     const [question] = await dbConnection.query(
-      "SELECT * FROM questions WHERE questionId = ?",
+      `SELECT * FROM questions WHERE questionid = ?`,
       [questionid]
     );
 
-    // If no question found, return 404
     if (question.length === 0) {
       return res
         .status(StatusCodes.NOT_FOUND)
         .json({ msg: "Question not found" });
     }
 
-    // Return the question details
-    return res.status(StatusCodes.OK).json({ question: question[0] });
+    // Fetch the related answers
+    const [answers] = await dbConnection.query(
+      `SELECT a.answerid, a.answer, a.created_at, a.image, a.audio, 
+              u.username
+       FROM answers a 
+       INNER JOIN users u ON a.userid = u.userid
+       WHERE a.questionid = ?`,
+      [questionid]
+    );
+
+    // Return both question and its answers
+    return res.status(StatusCodes.OK).json({
+      question: question[0],
+      answers,
+    });
   } catch (error) {
     console.error(error.message);
     return res

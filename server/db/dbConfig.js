@@ -9,48 +9,48 @@ const dbConnection = mysql.createPool({
 });
 
 // SQL for creating the `users` table
-const user = `CREATE TABLE if not exists users (
-    userId INT NOT NULL AUTO_INCREMENT,
-    userName VARCHAR(20) NOT NULL,
-    firstName VARCHAR(20) NOT NULL,
-    lastName VARCHAR(20) NOT NULL,
+const users = `CREATE TABLE if not exists users (
+    userid INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(20) NOT NULL,
+    firstname VARCHAR(20) NOT NULL,
+    lastname VARCHAR(20) NOT NULL,
     email VARCHAR(40) NOT NULL,
     password VARCHAR(100) NOT NULL,
     RegisteredTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     LastLogin TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY(userId)
-) ENGINE=InnoDB`; 
+    PRIMARY KEY(userid)
+) ENGINE=InnoDB`;
 
 // SQL for creating the `questions` table
-const question = `CREATE TABLE if not exists questions (
-    questionId INT NOT NULL AUTO_INCREMENT, 
-    userId INT NOT NULL,
+const questions = `CREATE TABLE if not exists questions (
+    questionid INT NOT NULL AUTO_INCREMENT, 
+    userid INT NOT NULL,
     title VARCHAR(50) NOT NULL,
     description VARCHAR(200) NOT NULL,
     tag VARCHAR(20),
     image VARCHAR(255),
     audio VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY(questionId),
-    FOREIGN KEY(userId) REFERENCES users(userId)
-) ENGINE=InnoDB`;  
+    PRIMARY KEY(questionid),
+    FOREIGN KEY(userid) REFERENCES users(userId)
+) ENGINE=InnoDB`;
 
 // SQL for creating the `answers` table
-const answer = `CREATE TABLE if not exists answers (
-    answerId INT NOT NULL AUTO_INCREMENT,
-    userId INT NOT NULL,
-    questionId INT NOT NULL,  
+const answers = `CREATE TABLE if not exists answers (
+    answerid INT NOT NULL AUTO_INCREMENT,
+    userid INT NOT NULL,
+    questionid INT NOT NULL,  
     answer VARCHAR(200) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     image VARCHAR(255),
     audio VARCHAR(255),
-    PRIMARY KEY(answerId),
-    FOREIGN KEY(userId) REFERENCES users(userId),
-    FOREIGN KEY(questionId) REFERENCES questions(questionId)
-) ENGINE=InnoDB`; 
+    PRIMARY KEY(answerid),
+    FOREIGN KEY(userId) REFERENCES users(userid),
+    FOREIGN KEY(questionid) REFERENCES questions(questionid)
+) ENGINE=InnoDB`;
 
 // Query to create `users` table
-dbConnection.query(user, (err, results) => {
+dbConnection.query(users, (err, results) => {
   if (err) {
     console.error("Error creating users table:", err);
     return;
@@ -59,7 +59,7 @@ dbConnection.query(user, (err, results) => {
 });
 
 // Query to create `questions` table
-dbConnection.query(question, (err, results) => {
+dbConnection.query(questions, (err, results) => {
   if (err) {
     console.error("Error creating questions table:", err);
     return;
@@ -68,7 +68,7 @@ dbConnection.query(question, (err, results) => {
 });
 
 // Query to create `answers` table
-dbConnection.query(answer, (err, results) => {
+dbConnection.query(answers, (err, results) => {
   if (err) {
     console.error("Error creating answers table:", err);
     return;

@@ -6,9 +6,18 @@ const {
 } = require("../controller/questionController"); // Import controller
 
 const route = require("express").Router();
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" }); // Specify upload directory
 
 // Define the route for posting a question
-route.post("/questions", authMiddleware, postQuestion);
+// route.post("/questions", authMiddleware, postQuestion);
+
+route.post(
+  "/questions",
+  upload.fields([{ name: "image" }, { name: "audio" }]),
+  authMiddleware,
+  postQuestion
+);
 
 // Define the route for fetching a single question
 route.get("/questions/:questionid", getSingleQuestion);
