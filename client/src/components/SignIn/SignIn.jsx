@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { axiosInstance } from "../../utility/axios.js"; // Ensure axiosInstance is properly configured
 import classes from "./Signin.module.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -9,6 +9,7 @@ function SignIn({ onSwitch }) {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showPassword, setShowPassword] = useState(false); // Show/hide password state
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const [formData, setFormData] = useState({
     email: "",
@@ -32,49 +33,33 @@ function SignIn({ onSwitch }) {
         password: formData.password,
       });
 
+      // Handle a successful response
       if (response.status === 200 && response.data.token) {
-        // Store the token in local storage
         localStorage.setItem(
           "Evandadi-Forum-token-JUN2024",
           response.data.token
-        );
-
-        // Set the Authorization header with the token for future requests
-        axiosInstance.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${response.data.token}`;
-
-        // Redirect to the home page
-        window.location.href = "/";
-
-        // Display success message
+        ); // Save the token
+        setSuccess("Login successful! Redirecting...");
         await Swal.fire({
           title: "Success!",
           text: "User logged in successfully!",
           icon: "success",
           confirmButtonText: "OK",
         });
+        setError(null);
+        navigate("/"); // Redirect to the homepage using navigate
       } else {
-        // Handle error case
-        setError(response.data.msg || "Login failed.");
-        await Swal.fire({
-          title: "Error",
-          text:
-            response.data.msg || "Error submitting the form. Please try again",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
-        setSuccess(null);
+        // Backend did not return success; throw an error
+        throw new Error(response.data.message || "Login failed.");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.msg || "Error logging in. Please try again."
-      );
+      // Handle errors
+      const errorMessage =
+        err.response?.data?.message || "Error logging in. Please try again.";
+      setError(errorMessage);
       await Swal.fire({
         title: "Error",
-        text:
-          err.response?.data?.msg ||
-          "Error submitting the form. Please try again",
+        text: errorMessage,
         icon: "error",
         confirmButtonText: "OK",
       });

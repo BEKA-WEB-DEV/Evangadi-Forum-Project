@@ -1,50 +1,45 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { axiosInstance } from "../../utility/axios"; // Use Axios for API calls
+import { axiosInstance } from "../../utility/axios.js";
 import Layout from "../../components/Layout/Layout";
 import classes from "./Answer.module.css";
 import { MdAccountCircle } from "react-icons/md";
 import { FaClipboardQuestion } from "react-icons/fa6";
 import { MdOutlineQuestionAnswer } from "react-icons/md";
 import moment from "moment";
-import { UserState } from "../../App.js";
+import { UserState } from "../../App";
 import { LuCalendarClock } from "react-icons/lu";
 import Swal from "sweetalert2";
 
-function Answer() {
+function QuestionAndAnswer() {
   const [questionDetails, setQuestionDetails] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [isPosting, setIsPosting] = useState(false);
-  const [expandedAnswer, setExpandedAnswer] = useState(null);
-  const [answerText, setAnswerText] = useState(""); // Controlled input state
   const { user } = useContext(UserState);
-  const userid = user?.userid;
+  const userName = user?.username.toUpperCase();
+  const userId = user?.userid;
   const { questionid } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [expandedAnswer, setExpandedAnswer] = useState(null); // State to track expanded answers
+  const answerInput = useRef();
 
   // Fetch the question details
   useEffect(() => {
-    setLoading(true);
-    axiosInstance
-      .get(`/questions/${questionid}`)
-      .then((res) => {
-        setQuestionDetails(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
-        console.error("Error fetching question details:", err);
+    axiosInstance.get(`/questions/${questionid}`).then((res) => {
+      setQuestionDetails({
+        ...res.data.question,
+        answers: res.data.answers, // Include the answers in state
       });
+      setLoading(false);
+    });
   }, [questionid]);
 
   // Post a new answer to the question
   async function handlePostAnswer(e) {
     e.preventDefault();
-    setIsPosting(true);
 
     try {
       const response = await axiosInstance.post("/answers", {
-        userid: userid,
-        answer: answerText,
+        userid: userId,
+        answer: answerInput.current.value,
         questionid: questionid,
       });
 
@@ -58,43 +53,34 @@ function Answer() {
           window.location.reload();
         });
       } else {
-        Swal.fire({
-          title: "Error",
-          text: "Failed to post answer",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+        throw new Error("Failed to post answer");
       }
     } catch (error) {
       Swal.fire({
         title: "Error",
-        text: "Failed to post answer. Please try again later.",
+        text: error.response?.data?.msg || "Failed to post answer.",
         icon: "error",
         confirmButtonText: "OK",
       });
-    } finally {
-      setIsPosting(false);
     }
   }
 
-  // Toggle expand/collapse for the answer
-  const toggleExpandAnswer = (answerId) => {
-    setExpandedAnswer((prev) => (prev === answerId ? null : answerId));
-  };
-
-  // Function to truncate text after a word limit
-  const truncateText = (text, limit = 50, answerId) => {
+  // Function to truncate text after 100 words
+  const truncateText = (text, limit = 50) => {
     if (!text) return "";
     const words = text.split(" ");
-    if (words.length > limit && expandedAnswer !== answerId) {
+    if (words.length > limit) {
       return (
         <>
           {words.slice(0, limit).join(" ")}{" "}
           <span
-            style={{ color: "var(--blue-shade)", cursor: "pointer" }}
-            onClick={() => toggleExpandAnswer(answerId)}
+            style={{
+              color: "var(--blue-shade)",
+              cursor: "pointer",
+            }}
+            onClick={() => setExpandedAnswer(null)}
           >
-            ...See More
+            ... See More
           </span>
         </>
       );
@@ -102,23 +88,25 @@ function Answer() {
     return text;
   };
 
+  // Toggle expand/collapse for the answer
+  const toggleExpandAnswer = (answerId) => {
+    if (expandedAnswer === answerId) {
+      setExpandedAnswer(null); // Collapse the answer
+    } else {
+      setExpandedAnswer(answerId); // Expand the answer
+    }
+  };
+
   return (
     <Layout>
-      {loading ? (
-        <div className={classes.spinnerContainer}>
-          <div className={classes.spinner}></div>
-        </div>
-      ) : (
-        <div className={classes.container}>
+      <div className={classes.container}>
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
           <div className={classes.mainContainer}>
-            {/* Question Section */}
-            <div style={{ display: "flex", marginBottom: "20px" }}>
-              <div>
-                <FaClipboardQuestion
-                  size={35}
-                  style={{ marginRight: "10px" }}
-                />
-              </div>
+            {/* Question Details */}
+            <div style={{ display: "flex" }}>
+              <FaClipboardQuestion size={35} style={{ marginRight: "10px" }} />
               <div>
                 <h1 className={classes.questionTitle}>
                   {questionDetails?.title}
@@ -128,47 +116,48 @@ function Answer() {
                 </p>
                 <p className={classes.question_date}>
                   Asked by:{" "}
-                  <span style={{ fontWeight: "600" }}>
-                    @{questionDetails?.qtn_username}
-                  </span>{" "}
+                  <span style={{ fontWeight: "600" }}> @{userName} </span>
                   <br />
-                  <LuCalendarClock style={{ marginRight: "5px" }} size={19} />
-                  {moment(questionDetails.qtn_createdAt)
+                  <LuCalendarClock size={19} style={{ marginRight: "5px" }} />
+                  {moment(questionDetails.created_at)
                     .format("ddd, MMM DD, YYYY h:mm A")
                     .toUpperCase()}
                 </p>
               </div>
             </div>
+            <hr />
 
             {/* Answers Section */}
-            <h2
-              style={{ padding: "5px 0", textAlign: "left", fontWeight: "600" }}
-            >
+            <h2 className={classes.answersHeader}>
               <MdOutlineQuestionAnswer
                 size={35}
                 style={{ marginRight: "10px" }}
               />
               Answers From the Community:
             </h2>
+            <hr />
             {questionDetails?.answers?.length > 0 ? (
-              questionDetails?.answers?.map((answer) => (
-                <div key={answer?.answerid} className={classes.answer_holder}>
+              questionDetails.answers.map((answer) => (
+                <div key={answer.answerid} className={classes.answer_holder}>
                   <div className={classes.account_holder}>
                     <MdAccountCircle size={50} />
-                    <div className={classes.profileName}>
-                      @{answer?.username}
-                    </div>
+                    <div className={classes.profileName}>{answer.username}</div>
                   </div>
-                  <div className={classes.answerTextContainer}>
+                  <div
+                    className={classes.answerTextContainer}
+                    onClick={() => toggleExpandAnswer(answer.answerid)}
+                  >
                     <p className={classes.answerText}>
-                      {truncateText(answer?.answer, 50, answer?.answerid)}
+                      {expandedAnswer === answer.answerid
+                        ? answer.answer
+                        : truncateText(answer.answer)}
                     </p>
                     <p className={classes.answer_date}>
                       <LuCalendarClock
-                        style={{ marginRight: "5px" }}
                         size={19}
+                        style={{ marginRight: "5px" }}
                       />
-                      {moment(answer?.createdAt)
+                      {moment(answer.created_at)
                         .format("ddd, MMM DD, YYYY h:mm A")
                         .toUpperCase()}
                     </p>
@@ -179,42 +168,28 @@ function Answer() {
               <p>
                 <span style={{ color: "red", fontWeight: "bold" }}>
                   No answers yet!
-                </span>{" "}
-                <br /> Be the first to contribute your answer and help the
-                community.
+                </span>
+                <br />
+                Be the first to contribute your answer.
               </p>
             )}
 
-            {/* Form to submit a new answer */}
-            <section className={classes.answerFormSection}>
-              <h3 className={classes.answerFormTitle}>
-                Answer The Top Question
-              </h3>
-              <Link to="/" className={classes.questionPageLink}>
-                Go to Question page
-              </Link>
-              <form onSubmit={handlePostAnswer}>
-                <textarea
-                  placeholder="Your Answer..."
-                  className={classes.answerInput}
-                  required
-                  value={answerText}
-                  onChange={(e) => setAnswerText(e.target.value)}
-                />
-                <button
-                  className={classes.postAnswerButton}
-                  type="submit"
-                  disabled={isPosting}
-                >
-                  {isPosting ? "Posting..." : "Post Your Answer"}
-                </button>
-              </form>
-            </section>
+            {/* Answer Form */}
+            <form onSubmit={handlePostAnswer} className={classes.answerForm}>
+              <textarea
+                placeholder="Your Answer..."
+                ref={answerInput}
+                required
+                className={classes.answerInput}
+              />
+              <button type="submit" className={classes.postAnswerButton}>
+                Post Your Answer
+              </button>
+            </form>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Layout>
   );
 }
-
-export default Answer;
+export default QuestionAndAnswer;

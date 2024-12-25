@@ -1,11 +1,9 @@
-/* General Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Header Container */
 .header {
   min-width: 500px;
   min-height: 10vh;
@@ -19,7 +17,6 @@
   z-index: 1;
 }
 
-/* Outer Container to Center Content */
 .container {
   width: 100%;
   max-width: 1200px;
@@ -30,7 +27,6 @@
   margin: 20px 0;
 }
 
-/* Inner Container for Flex Alignment */
 .innerContainer {
   display: flex;
   justify-content: space-between;
@@ -38,12 +34,10 @@
   width: 100%;
 }
 
-/* Evangadi Logo Styling */
 img {
   width: 200px;
 }
 
-/* Navigation Links Container */
 .navLinks {
   display: flex;
   align-items: center;
@@ -53,7 +47,6 @@ img {
   font-size: 20px;
 }
 
-/* Individual Navigation Links */
 .navLinks > a:not(:last-child) {
   color: #3b455a;
   text-decoration: none;
@@ -69,7 +62,6 @@ img {
   color: #ff8500;
 }
 
-/* Login Button */
 .login {
   background-color: #516cf0;
   color: #ffffff;
@@ -86,9 +78,8 @@ img {
   text-decoration: none;
 }
 
-/* Logout Button */
 .logoutButton {
-  background-color: #ff4d4d; /* Red logout button */
+  background-color: #ff4d4d;
   color: #ffffff;
   padding: 8px 16px;
   border: none;
@@ -99,10 +90,9 @@ img {
 }
 
 .logoutButton:hover {
-  background-color: #e04444; /* Slightly darker red */
+  background-color: #e04444;
 }
 
-/* Responsive Design for Smaller Screens */
 @media (max-width: 768px) {
   .navLinks {
     gap: 10px;
@@ -162,4 +152,5 @@ img {
 .navLinks .login:hover {
   background-color: #516cf0;
   color: #ffffff;
-} */
+}
+*/

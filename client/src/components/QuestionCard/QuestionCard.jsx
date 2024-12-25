@@ -4,16 +4,19 @@ import { FaChevronRight } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import { LuCalendarClock } from "react-icons/lu";
+import { useContext } from "react";
+import { UserState } from "../../App";
 
 function QuestionCard({
   id,
-  userName,
   questionTitle,
   description,
   question_date,
   imageUrl,
   audioUrl,
 }) {
+  const { user } = useContext(UserState);
+  const userName = String(user?.username).toUpperCase();
   const formattedDate = moment(question_date)
     .format("ddd, MMM DD, YYYY h:mm A")
     .toUpperCase();
@@ -28,7 +31,12 @@ function QuestionCard({
           {/* User Info Section */}
           <div className={classes.requester_holder}>
             <MdAccountCircle size={50} />
-            <div>@{userName}</div>
+            <div>
+              @
+              {userName && userName.length > 10
+                ? userName.substring(0, 10).concat(". . .") // Display only first 10 characters
+                : userName}
+            </div>
           </div>
 
           {/* Question Content */}

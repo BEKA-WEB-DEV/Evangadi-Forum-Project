@@ -3,142 +3,99 @@ import classes from "./AskQuestion.module.css";
 import { axiosInstance } from "../../../utility/axios"; // Use Axios for API calls
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../../../components/Layout/Layout";
+import ClipLoader from "react-spinners/ClipLoader";
 import { UserState } from "../../../App.js";
-import Swal from "sweetalert2";
 
 function AskQuestion() {
-  // const navigate = useNavigate();
-  // const { user } = useContext(UserState);
-
-  // const titleDom = useRef();
-  // const descriptionDom = useRef();
-  // const [imageFile, setImageFile] = useState(null);
-  // const [audioFile, setAudioFile] = useState(null);
-  // const userId = user?.userid;
-
-  // async function handleSubmit(e) {
-  //   e.preventDefault();
-  //   const title = titleDom.current.value;
-  //   const description = descriptionDom.current.value;
-  //   const userid = userId;
-  //   const tag = "General";
-
-  //   try {
-  //     // Create FormData to handle file uploads
-  //     const formData = new FormData();
-  //     formData.append("userid", userid);
-  //     formData.append("title", title);
-  //     formData.append("description", description);
-  //     formData.append("tag", tag);
-  //     if (imageFile) {
-  //       formData.append("image", imageFile);
-  //     }
-  //     if (audioFile) {
-  //       formData.append("audio", audioFile);
-  //     }
-
-  //     // Make a POST request to create a new question
-  //     const response = await axios.post(
-  //       "http://localhost:3003/api/questions",
-  //       formData,
-  //       {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data", // Set the content type for file uploads
-  //         },
-  //       }
-  //     );
-
-  //     if (response.status === 201) {
-  //       console.log("Question created successfully");
-  //       await Swal.fire({
-  //         title: "Success!",
-  //         text: "Question created successfully!",
-  //         icon: "success",
-  //         confirmButtonText: "OK",
-  //       });
-  //       navigate("/");
-  //     } else {
-  //       console.error("Failed to create question");
-  //       await Swal.fire({
-  //         title: "Error",
-  //         text: "Failed to create question",
-  //         icon: "error",
-  //         confirmButtonText: "OK",
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     await Swal.fire({
-  //       title: "Error",
-  //       text: "Failed to create question. Please try again later.",
-  //       icon: "error",
-  //       confirmButtonText: "OK",
-  //     });
-  //   }
   const navigate = useNavigate();
   const { user } = useContext(UserState);
-  const [imageFile, setImageFile] = useState(null);
-  const [audioFile, setAudioFile] = useState(null);
 
-  // const navigate = useNavigate();
   const titleDom = useRef();
   const descriptionDom = useRef();
+  const [isPosting, setIsPosting] = useState(false); // State for loading spinner
+  const [image, setImage] = useState(null); // State for image file
+  const [audio, setAudio] = useState(null); // State for audio file
   const userId = user?.userid;
-  console.log(user);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const title = titleDom.current.value;
-    const description = descriptionDom.current.value;
-    const userid = userId;
-    const tag = "General";
-
-    try {
-      // Make a POST request to your server to create a new question
-      const response = await axiosInstance.post("/questions", {
-        userid,
-        title,
-        description,
-        tag,
-        image: imageFile,
-        audio: audioFile,
-      });
-      if (response.status === 201) {
-        console.log("Question created successfully");
-        await Swal.fire({
-          title: "Success!",
-          text: "Question created successfully!",
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-        navigate("/");
-      } else {
-        console.error("Failed to create question");
-        await Swal.fire({
-          title: "Error",
-          text: "Failed to create question",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+  // Function to handle image upload
+  function handleImageChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        alert("Please upload a valid image file.");
+        return;
       }
-    } catch (error) {
-      console.error(error);
-      await Swal.fire({
-        title: "Error",
-        text: "Failed to create question. Please try again later.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+      setImage(file);
+      console.log("Image file:", file);
+    } else {
+      alert("No image file selected.");
     }
   }
 
-  const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
-  };
+  // Function to handle audio upload
+  function handleAudioChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("audio/")) {
+        alert("Please upload a valid audio file.");
+        return;
+      }
+      setAudio(file);
+      console.log("Audio file:", file);
+    } else {
+      alert("No audio file selected.");
+    }
+  }
 
-  const handleAudioChange = (e) => {
-    setAudioFile(e.target.files[0]);
-  };
+  // Function to handle form submission
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setIsPosting(true); // Start spinner
+
+    const title = titleDom.current.value.trim();
+    const description = descriptionDom.current.value.trim();
+    const userid = userId;
+    const tag = "General";
+
+    if (!title || !description) {
+      alert("Both title and description are required.");
+      setIsPosting(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("userid", userid);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("tag", tag);
+    if (image) formData.append("image", image);
+    if (audio) formData.append("audio", audio);
+
+    try {
+      const response = await axiosInstance.post("/questions", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 201) {
+        navigate("/");
+      } else {
+        alert("Failed to create question. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      if (error.response) {
+        alert(
+          `Error: ${error.response.data.message || "Something went wrong."}`
+        );
+      } else {
+        alert("Failed to create question. Please try again later.");
+      }
+    } finally {
+      setIsPosting(false); // Stop spinner
+    }
+  }
 
   return (
     <Layout>
@@ -194,6 +151,7 @@ function AskQuestion() {
                 type="text"
                 placeholder="Question title"
                 required
+                aria-label="Question title"
               />
               <textarea
                 rows={4}
@@ -201,6 +159,7 @@ function AskQuestion() {
                 ref={descriptionDom}
                 placeholder="Question Description..."
                 required
+                aria-label="Question description"
               />
               <div className={classes.fileUploadContainer}>
                 <label htmlFor="imageUpload" className={classes.fileLabel}>
@@ -212,7 +171,18 @@ function AskQuestion() {
                   accept="image/*"
                   onChange={handleImageChange}
                   className={classes.fileInput}
+                  aria-label="Upload an image"
                 />
+                {image && (
+                  <div className={classes.previewContainer}>
+                    <p>Image Preview:</p>
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt="Preview"
+                      className={classes.imagePreview}
+                    />
+                  </div>
+                )}
               </div>
               <div className={classes.fileUploadContainer}>
                 <label htmlFor="audioUpload" className={classes.fileLabel}>
@@ -224,11 +194,25 @@ function AskQuestion() {
                   accept="audio/*"
                   onChange={handleAudioChange}
                   className={classes.fileInput}
+                  aria-label="Upload an audio file"
                 />
+                {audio && (
+                  <div className={classes.previewContainer}>
+                    <p>Audio file selected: {audio.name}</p>
+                  </div>
+                )}
               </div>
               <div className={classes.buttonContainer}>
-                <button className={classes.question__button} type="submit">
-                  Post Question
+                <button
+                  className={classes.question__button}
+                  type="submit"
+                  disabled={isPosting} // Disable button while posting
+                >
+                  {isPosting ? (
+                    <ClipLoader size={20} color="#fff" /> // Spinner while loading
+                  ) : (
+                    "Post Question"
+                  )}
                 </button>
                 <Link to="/">
                   <button className={classes.question__btn} type="button">

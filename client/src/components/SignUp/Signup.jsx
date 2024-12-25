@@ -47,7 +47,7 @@ function SignUp({ onSwitch }) {
     setError(null); // Reset error state
 
     try {
-      const response = await axiosInstance.post("/auth/signup", formData);
+      const response = await axiosInstance.post("/user/register", formData);
 
       if (response.status === 201) {
         Swal.fire({

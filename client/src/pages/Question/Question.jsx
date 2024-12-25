@@ -12,7 +12,15 @@ function Question() {
   const [currentPage, setCurrentPage] = useState(1); // Current page state
   const questionsPerPage = 5; // Number of questions per page
 
-  const { users } = useContext(UserState);
+  const { user } = useContext(UserState);
+  // Check if user is logged in
+  useEffect(() => {
+    if (!user) {
+      console.error("User is not logged in.");
+      // Redirect or show an error message if user context is missing
+      return;
+    }
+  }, [user]);
 
   // Fetch questions from API
   useEffect(() => {

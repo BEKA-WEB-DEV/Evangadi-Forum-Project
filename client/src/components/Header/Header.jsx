@@ -1,20 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import classes from "./Header.module.css";
 import EvangadiLogo from "../../assets/Images/evangadi-logo-header.png";
+import { UserState } from "../../App";
 
 function Header() {
+  // const { user } = useContext(UserState);
+  // const userId = user?.userid;
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("Evandadi-Forum-token-JUN2024");
-    setIsLoggedIn(!!token);
+    setIsLoggedIn(token);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("Evandadi-Forum-token-JUN2024");
-    setIsLoggedIn(false);
+    setIsLoggedIn({});
     navigate("/auth");
   };
 

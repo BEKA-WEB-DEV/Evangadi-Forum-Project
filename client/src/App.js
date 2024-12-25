@@ -14,7 +14,7 @@ function App() {
   // Fetch user data
   const getUserData = async () => {
     try {
-      const token = localStorage.getItem("EV-Forum-token-G3-APR2024"); // Get the token from local storage
+      const token = localStorage.getItem("Evandadi-Forum-token-JUN2024"); // Get the token from local storage
       if (!token) {
         navigate("/auth"); // Redirect to auth if no token is found
         return;

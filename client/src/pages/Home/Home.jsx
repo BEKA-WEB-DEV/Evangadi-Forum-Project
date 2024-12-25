@@ -4,18 +4,12 @@ import { BsArrowRightSquareFill } from "react-icons/bs";
 import Layout from "../../components/Layout/Layout";
 import { Link } from "react-router-dom";
 import { UserState } from "../../App";
-import { axiosInstance } from "../../utility/axios";
 import Question from "../Question/Question";
 
 function Home() {
   const { user } = useContext(UserState);
-  const userName = String(user?.username);
-  console.log(userName);
-  // const username = users?.username ? users.username : "Guest"; // Fallback for guest users
+  const userName = String(user?.username).toUpperCase();
   const [greeting, setGreeting] = useState("");
-  const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   // Determine greeting based on time
   useEffect(() => {
@@ -29,24 +23,6 @@ function Home() {
         ? "Good Evening"
         : "Good Evening";
     setGreeting(greetingMessage);
-  }, []);
-
-  // Fetch Questions
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const response = await axiosInstance.get("/questions");
-        setQuestions(response.data.questions || []);
-      } catch (err) {
-        setError("Failed to load questions. Please try again later.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchQuestions();
   }, []);
 
   return (
@@ -64,9 +40,12 @@ function Home() {
           </div>
           <div className={classes.welcome_msg}>
             <p>
-              {greeting},{" "}
+              {greeting},
               <span className={classes.userName}>
-                {userName.charAt(0).toUpperCase() + userName.slice(1)}
+                {userName.charAt(0).toUpperCase() + userName.slice(1) &&
+                userName.length > 10
+                  ? userName.substring(0, 10).concat(". . .")
+                  : userName}
               </span>
             </p>
           </div>
