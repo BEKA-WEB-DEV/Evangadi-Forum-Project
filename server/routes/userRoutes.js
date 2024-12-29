@@ -10,6 +10,8 @@ const {
   login,
   checkUser,
   logOut,
+  sendOtp,
+  verifyOtp,
 } = require("../controller/userController");
 
 // Register route
@@ -23,6 +25,10 @@ router.get("/check", authMiddleware, checkUser);
 
 // Logout route
 router.delete("/logout", logOut);
+
+// Send OTP route
+router.post("/forgotPassword", sendOtp);
+router.post("/verifyOtp", verifyOtp);
 
 // Export the router
 module.exports = router;

@@ -1,12 +1,6 @@
 const mysql = require("mysql2");
+require("dotenv").config();
 // Database connection configuration
-const dbConnection = mysql.createPool({
-  user: process.env.USER,
-  host: process.env.HOST,
-  password: process.env.PASSWORD,
-  database: process.env.DB_NAME,
-  connectionLimit: 10,
-});
 
 // SQL for creating the `users` table
 const users = `CREATE TABLE if not exists users (
@@ -74,6 +68,14 @@ dbConnection.query(answers, (err, results) => {
     return;
   }
   console.log("Answers table created");
+});
+
+const dbConnection = mysql.createPool({
+  user: process.env.USER,
+  host: process.env.HOST,
+  password: process.env.PASSWORD,
+  database: process.env.DB_NAME,
+  connectionLimit: 5,
 });
 
 // Exporting db connection as a promise-based object
